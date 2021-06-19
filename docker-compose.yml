@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  file-service:
+    container_name: file-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - file-service-db
+    ports:
+      - 8080:8080
+    networks:
+      - device-backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: app
+      DB_PASSWORD: pass
+
+  file-service-db:
+    image: library/postgres:11
+    container_name: file-service-db
+    ports:
+      - 5000:5432
+    networks:
+      - device-backend
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+
+networks:
+  device-backend:
+    external:
+      name: device-backend
