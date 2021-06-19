@@ -10,8 +10,7 @@ services:
     networks:
       - device-backend
     environment:
-      DB_HOST: file-service-db
-      DB_PORT: 5432
+      DB_URL: jdbc:postgresql://file-service-db:5432/db
       DB_USERNAME: app
       DB_PASSWORD: pass
     depends_on:
@@ -29,7 +28,7 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: pass
     volumes:
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./docker-entrypoint-initdb:/docker-entrypoint-initdb.d:ro
 
 networks:
   device-backend:
