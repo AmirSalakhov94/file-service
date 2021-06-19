@@ -4,6 +4,6 @@ COPY . .
 RUN mvn -B package
 
 FROM openjdk:16-slim
-COPY target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 CMD ["java", "-jar", "app.jar"]
 EXPOSE 8080
