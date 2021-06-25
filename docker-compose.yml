@@ -5,14 +5,14 @@ services:
     image: file-service
     container_name: file-service
     build: .
-    ports:
-      - 8080:8080
     networks:
       - device-backend
     environment:
-      DB_URL: jdbc:postgresql://file-service-db:5432/db
+      DB_HOST: file-service-db
+      DB_PORT: 5432
       DB_USERNAME: app
       DB_PASSWORD: pass
+      FILE_PATH: /tmp
     depends_on:
       - file-service-db
 

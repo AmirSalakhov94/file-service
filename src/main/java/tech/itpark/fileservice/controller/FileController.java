@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/fileservice")
 public class FileController {
 
     private final FileStorage fileStorage;
