@@ -8,10 +8,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tech.itpark.fileservice.dto.FileMetaDto;
+import tech.itpark.fileservice.dto.ProfileDto;
 import tech.itpark.fileservice.exception.NotFoundFileException;
 import tech.itpark.fileservice.mapper.FileMetaMapper;
 import tech.itpark.fileservice.model.FileMetaEntity;
 import tech.itpark.fileservice.repository.FileMetaRepository;
+import tech.itpark.fileservice.security.principal.ProfilePrincipalExtractor;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -21,13 +23,13 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class FileStorageImpl implements FileStorage {
 
+    private final ProfilePrincipalExtractor principalExtractor;
     private final FileMetaRepository fileMetaRepository;
     private final FileMetaMapper fileMetaMapper;
 
@@ -36,7 +38,8 @@ public class FileStorageImpl implements FileStorage {
 
     @SneakyThrows
     @Override
-    public FileMetaDto store(UUID profileId, MultipartFile file) {
+    public FileMetaDto store(MultipartFile file) {
+        ProfileDto profile = principalExtractor.extractPrincipal();
         Path dir = Files.createDirectories(Paths.get(rootPath + "/" + DateTimeFormatter.BASIC_ISO_DATE.format(LocalDate.now())));
 
         String contentType = file.getContentType();
@@ -49,7 +52,7 @@ public class FileStorageImpl implements FileStorage {
 
         return fileMetaMapper.fromEntity(fileMetaRepository.save(FileMetaEntity.builder()
                 .name(originalFilename)
-                .profileId(profileId)
+                .profileId(profile.getId())
                 .extension(contentType)
                 .path(path.toFile().getPath())
                 .size(size)
@@ -58,10 +61,11 @@ public class FileStorageImpl implements FileStorage {
 
     @SneakyThrows
     @Override
-    public Resource load(UUID profileId, String path) {
-        fileMetaRepository.findByProfileIdAndPath(profileId, path)
+    public Resource load(String path) {
+        ProfileDto profile = principalExtractor.extractPrincipal();
+        fileMetaRepository.findByProfileIdAndPath(profile.getId(), path)
                 .orElseThrow(() -> {
-                    throw new NotFoundFileException(String.format("Not found file by profile id = %s and path = %s", profileId, path));
+                    throw new NotFoundFileException(String.format("Not found file by profile id = %s and path = %s", profile.getId(), path));
                 });
 
         Path file = Paths.get(path);
@@ -73,17 +77,19 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public FileMetaDto getMetaData(UUID profileId, String path) {
-        return fileMetaRepository.findByProfileIdAndPath(profileId, path)
+    public FileMetaDto getMetaData(String path) {
+        ProfileDto profile = principalExtractor.extractPrincipal();
+        return fileMetaRepository.findByProfileIdAndPath(profile.getId(), path)
                 .map(fileMetaMapper::fromEntity)
                 .orElseThrow(() -> {
-                    throw new NotFoundFileException(String.format("Not found file by profile id = %s and path = %s", profileId, path));
+                    throw new NotFoundFileException(String.format("Not found file by profile id = %s and path = %s", profile.getId(), path));
                 });
     }
 
     @Override
-    public List<FileMetaDto> getMetaData(UUID profileId) {
-        return fileMetaRepository.findByProfileId(profileId)
+    public List<FileMetaDto> getMetaData() {
+        ProfileDto profile = principalExtractor.extractPrincipal();
+        return fileMetaRepository.findByProfileId(profile.getId())
                 .stream()
                 .map(fileMetaMapper::fromEntity)
                 .collect(Collectors.toList());

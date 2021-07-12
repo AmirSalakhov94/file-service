@@ -5,15 +5,14 @@ import org.springframework.web.multipart.MultipartFile;
 import tech.itpark.fileservice.dto.FileMetaDto;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface FileStorage {
 
-    FileMetaDto store(UUID profileId, MultipartFile file);
+    FileMetaDto store(MultipartFile file);
 
-    Resource load(UUID profileId, String path);
+    Resource load(String path);
 
-    FileMetaDto getMetaData(UUID profileId, String path);
+    FileMetaDto getMetaData(String path);
 
-    List<FileMetaDto> getMetaData(UUID profileId);
+    List<FileMetaDto> getMetaData();
 }

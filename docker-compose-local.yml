@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  file-service:
+    image: file-service
+    container_name: file-service
+    build: .
+    networks:
+      - device-backend
+    depends_on:
+      - file-service-db
+    environment:
+      DB_HOST: file-service-db
+      DB_PORT: 5432
+      DB_USERNAME: app
+      DB_PASSWORD: pass
+      FILE_PATH: /tmp
+      SPRING_PROFILES_ACTIVE: local
+
+  file-service-db:
+    image: library/postgres:11
+    container_name: file-service-db
+    ports:
+      - 7432:5432
+    networks:
+      - device-backend
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - ./docker-entrypoint-initdb:/docker-entrypoint-initdb.d:ro
+
+  consul:
+    image: consul:1.8.3
+    container_name: consul
+    command: agent -dev -ui -node=server1 -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - 8500:8500
+    networks:
+      - device-backend
+
+networks:
+  device-backend:
+    external:
+      name: device-backend

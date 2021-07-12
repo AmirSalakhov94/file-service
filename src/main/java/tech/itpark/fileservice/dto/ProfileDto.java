@@ -1,7 +1,9 @@
 package tech.itpark.fileservice.dto;
 
 import lombok.*;
+import tech.itpark.fileservice.dto.enums.Role;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -16,4 +18,6 @@ public class ProfileDto {
     private String password;
     private String phone;
     private String email;
+    private Role role;
+    private Instant createDate;
 }
