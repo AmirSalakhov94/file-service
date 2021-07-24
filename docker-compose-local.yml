@@ -32,7 +32,7 @@ services:
       - ./docker-entrypoint-initdb:/docker-entrypoint-initdb.d:ro
 
   consul:
-    image: consul:1.8.3
+    image: consul:1.10.1
     container_name: consul
     command: agent -dev -ui -node=server1 -bootstrap-expect=1 -client=0.0.0.0
     ports:
